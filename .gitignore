@@ -1,0 +1,7 @@
+.deps
+*.log
+*.pid
+*.sh
+.libs/
+bin/
+obj/
