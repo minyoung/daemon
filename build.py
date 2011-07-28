@@ -4,6 +4,9 @@ from fabricate import *
 import os
 
 SOURCES = [
+    'common.c',
+    'logging.c',
+    'daemon.c',
     'main.c',
 ]
 
