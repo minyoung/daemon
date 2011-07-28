@@ -9,7 +9,7 @@ void vlogger(FILE *stream, int priority, char *format, va_list args) {
     char *log_level;
     time_t current_time = time(NULL);
     struct tm *time_value = gmtime(&current_time);
-    strftime(time_string, sizeof(time_string), "%y-%m-%d %H:%M:%S UTC", time_value);
+    strftime(time_string, sizeof(time_string), "%Y-%m-%d %H:%M:%S UTC", time_value);
     switch (priority) {
         case LOG_EMERG:
             log_level = "EMERGENCY";
