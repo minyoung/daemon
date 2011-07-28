@@ -11,6 +11,18 @@ SOURCES = [
 ]
 
 TESTS = {
+    'test_common': {
+        'test': ['test_common.c'],
+        'src': ['common.c']
+    },
+    'test_logging': {
+        'test': ['test_logging.c'],
+        'src': ['logging.c']
+    },
+    'test_daemon': {
+        'test': ['test_daemon.c'],
+        'src': ['daemon.c', 'logging.c']
+    },
 }
 
 PATHS = {
