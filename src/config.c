@@ -41,16 +41,21 @@ void config_print_usage(struct config *self, FILE *stream) {
             "Usage: daemon arg_config\n"
             "  --help           -h      Display this help screen\n"
             "  --show           -s      Show config config\n"
-            "  --config=arg     -c      Specify config file to load\n"
-            "                               Default: none\n"
             "  --daemon         -d      Run as a daemon\n"
-            "                               Default: false\n"
+            "                               Default: %s\n"
+            "  --config=arg     -c      Specify config file to load\n"
+            "                               Default: %s\n"
             "  --flock=arg      -f      Specify lock/pid file\n"
-            "                               Default: statsd.pid\n"
+            "                               Default: %s\n"
             "  --log=arg        -l      Specify log file\n"
-            "                               Default: statsd.log\n"
+            "                               Default: %s\n"
             "  --verbose        -v      Output verbose information\n"
-            "                               Default: false\n"
+            "                               Default: %s\n",
+        "false",
+        DEFAULT_CONFIG_FILE,
+        DEFAULT_LOCK_FILE,
+        DEFAULT_LOG_FILE,
+        "false"
     );
 }
 
@@ -58,11 +63,17 @@ status_t config_parse_args(struct config *self, int argc, char **argv) {
     int next = 0;
     int index = 0;
 
+    self->daemon = 0;
+    string_copy(&self->config_filename, DEFAULT_CONFIG_FILE);
+    string_copy(&self->lock_filename, DEFAULT_LOCK_FILE);
+    string_copy(&self->log_filename, DEFAULT_LOG_FILE);
+    self->log_level = DEFAULT_LOG_LEVEL;
+
     do {
         next = getopt_long(argc, argv, args_short, args_long, &index);
         switch (next) {
             case 's': // show
-                config_print_usage(self, stdout);
+                /* config_print_usage(self, stdout); */
                 return FAILURE;
             case 'c': // config file
                 string_copy(&(self->config_filename), optarg);
@@ -79,11 +90,12 @@ status_t config_parse_args(struct config *self, int argc, char **argv) {
                 string_copy(&(self->log_filename), optarg);
                 logger(stdout, LOG_DEBUG, "Setting log file: %s", self->log_filename);
                 break;
-            case 'v': //verbose
+            case 'v': // verbose
                 self->log_level = LOG_DEBUG;
                 break;
             case -1:
-                break;
+            case 1: // for some reason, unit testing causes 1 to appear for the last NULL arg...
+                return SUCCESS;
             case '?':
             case ':':
                 config_print_usage(self, stdout);
@@ -91,18 +103,7 @@ status_t config_parse_args(struct config *self, int argc, char **argv) {
             case 'h':
             default:
                 config_print_usage(self, stdout);
-                return SUCCESS;
+                return FAILURE;
         }
-    } while (next != -1);
-
-    /* if (self->config_filename != NULL) { */
-        /* configuration_load_from_file(daemonizer); */
-    /* } */
-    /* copy_if_null(&(self->config_filename), "statsd.conf"); */
-
-/* #define copy_if_null(dest, value) if (dest == NULL) string_copy(&(dest), value); */
-    copy_if_null(&(self->lock_filename), "daemon.pid");
-    copy_if_null(&(self->log_filename), "daemon.log");
-
-    return SUCCESS;
+    } while (1);
 }
