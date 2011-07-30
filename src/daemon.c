@@ -7,7 +7,7 @@
 #include "unit_testing.h"
 
 struct daemon *daemon_new() {
-    logger(stdout, LOG_DEBUG, "daemonizer_new [%m]");
+    logger(stdout, LOG_DEBUG, "daemon_new [%m]");
     struct daemon *self = NULL;
 
     if (self = malloc(sizeof(*self))) {
@@ -22,4 +22,3 @@ void daemon_delete(struct daemon *self) {
         free(self);
     }
 }
-

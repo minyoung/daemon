@@ -5,6 +5,7 @@ import os
 
 SOURCES = [
     'common.c',
+    'config.c',
     'logging.c',
     'daemon.c',
     'main.c',
@@ -14,6 +15,10 @@ TESTS = {
     'test_common': {
         'test': ['test_common.c'],
         'src': ['common.c']
+    },
+    'test_config': {
+        'test': ['test_config.c'],
+        'src': ['config.c', 'common.c', 'logging.c']
     },
     'test_logging': {
         'test': ['test_logging.c'],

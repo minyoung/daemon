@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "unit_testing.h"
 
