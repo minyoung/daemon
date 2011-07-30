@@ -20,5 +20,6 @@ struct config *config_new();
 void config_delete(struct config *self);
 
 status_t config_parse_args(struct config *self, int argc, char **argv);
+status_t config_load_file(struct config *self, const char *filename);
 
 #endif

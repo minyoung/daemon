@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <getopt.h>
 
+#include <ini.h>
+
 #include "logging.h"
 
 static const char *const args_short= "hsc:df:l:v";
@@ -63,6 +65,8 @@ status_t config_parse_args(struct config *self, int argc, char **argv) {
     int next = 0;
     int index = 0;
 
+    // reset option parser (mainly for testing...)
+    optind = 1;
     self->daemon = 0;
     string_copy(&self->config_filename, DEFAULT_CONFIG_FILE);
     string_copy(&self->lock_filename, DEFAULT_LOCK_FILE);
@@ -94,8 +98,7 @@ status_t config_parse_args(struct config *self, int argc, char **argv) {
                 self->log_level = LOG_DEBUG;
                 break;
             case -1:
-            case 1: // for some reason, unit testing causes 1 to appear for the last NULL arg...
-                return SUCCESS;
+                break;
             case '?':
             case ':':
                 config_print_usage(self, stdout);
@@ -105,5 +108,30 @@ status_t config_parse_args(struct config *self, int argc, char **argv) {
                 config_print_usage(self, stdout);
                 return FAILURE;
         }
-    } while (1);
+    } while (next != -1);
+    return SUCCESS;
+}
+
+int config_ini_handler(void *user, const char *section, const char *name, const char *value) {
+    struct config *self = (struct config*)user;
+/* #define MATCH(s, n) stricmp(section, s) == 0 && stricmp(name, n) == 0 */
+#define MATCH(n) strcasecmp(name, n) == 0
+    if (MATCH("daemon")) {
+        self->daemon = atoi(value) == 0 ? 0 : 1;
+    } else if (MATCH("verbose")) {
+        if (atoi(value) != 0) {
+            self->log_level = LOG_DEBUG;
+        }
+    } else if (MATCH("lock")) {
+        string_copy(&(self->lock_filename), value);
+        logger(stdout, LOG_DEBUG, "Setting lock file: %s", self->lock_filename);
+    } else if (MATCH("log")) {
+        string_copy(&(self->log_filename), value);
+        logger(stdout, LOG_DEBUG, "Setting log file: %s", self->log_filename);
+    }
+#undef MATCH
+}
+
+status_t config_load_file(struct config *self, const char *filename) {
+    ini_parse(filename, config_ini_handler, self);
 }
