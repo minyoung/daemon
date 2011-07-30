@@ -37,6 +37,12 @@ void vlogger(FILE *stream, int priority, char *format, va_list args) {
             break;
     }
 
+#ifdef UNIT_TESTING
+    // suppress outputting to stdout/stderr when unit testing
+    if ((stream == stdout) || (stream == stderr)) {
+        return;
+    }
+#endif
     fprintf(stream, "%s [%s]: ", time_string, log_level);
     vfprintf(stream, format, args);
     fprintf(stream, "\n");
