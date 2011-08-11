@@ -130,8 +130,12 @@ int config_ini_handler(void *user, const char *section, const char *name, const 
         logger(stdout, LOG_DEBUG, "Setting log file: %s", self->log_filename);
     }
 #undef MATCH
+    return 1;
 }
 
 status_t config_load_file(struct config *self, const char *filename) {
-    ini_parse(filename, config_ini_handler, self);
+    if (filename == NULL) {
+        return SUCCESS;
+    }
+    return ini_parse(filename, config_ini_handler, self) == 0 ? SUCCESS : FAILURE;
 }

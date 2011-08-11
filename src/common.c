@@ -36,3 +36,9 @@ inline void free_pointer(char **ptr) {
     }
 }
 
+inline void close_file(FILE **file) {
+    if (*file != NULL) {
+        fclose(*file);
+        *file = NULL;
+    }
+}
