@@ -20,7 +20,11 @@ struct daemon *daemon_new(struct config *config) {
 
     if (self = malloc(sizeof(*self))) {
         self->config = config;
-        self->log_file = fopen(self->config->log_filename, "a");
+        if (self->config->log_filename != NULL) {
+            self->log_file = fopen(self->config->log_filename, "a");
+        } else {
+            self->log_file = NULL;
+        }
 
         daemon_log(self, LOG_DEBUG, "daemon created [%m]");
     }
@@ -53,7 +57,9 @@ void daemon_log(struct daemon *self, int priority, char *format, ...) {
 
     va_start(args, format);
     vlogger(stdout, priority, format, args);
-    vlogger(self->log_file, priority, format, args);
+    if (self->log_file != NULL) {
+        vlogger(self->log_file, priority, format, args);
+    }
 }
 
 
@@ -69,7 +75,7 @@ status_t daemon_get_lock(struct daemon *self) {
         .l_start = 0,
         .l_whence = SEEK_SET,
         .l_len = 0,
-        .l_pid = self->pid
+        .l_pid = 0
     };
 
     daemon_log(self, LOG_INFO, "Trying to get lock on file: \"%s\"", self->config->lock_filename);

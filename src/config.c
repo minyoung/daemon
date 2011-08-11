@@ -26,6 +26,8 @@ struct config *config_new() {
 
     if (self = malloc(sizeof(*self))) {
         logger(stdout, LOG_DEBUG, "config created");
+        self->log_filename = NULL;
+        self->lock_filename = NULL;
     }
 
     return self;

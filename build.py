@@ -26,7 +26,7 @@ TESTS = {
     },
     'test_daemon': {
         'test': ['test_daemon.c'],
-        'src': ['daemon.c', 'logging.c']
+        'src': ['daemon.c', 'config.c', 'common.c', 'logging.c']
     },
 }
 
