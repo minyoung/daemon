@@ -34,12 +34,20 @@ struct daemon *daemon_new(struct config *config) {
 
 void daemon_delete(struct daemon *self) {
     if (self != NULL) {
+        network_close_socket(self);
+        config_delete(self->config);
+        self->config = NULL;
+
         if (self->log_file != NULL) {
             fclose(self->log_file);
             self->log_file = NULL;
         }
-        config_delete(self->config);
-        self->config = NULL;
+
+        if (self->lock_fd != 0) {
+            close(self->lock_fd);
+            self->lock_fd = 0;
+        }
+
         free(self);
     }
 }
@@ -47,6 +55,19 @@ void daemon_delete(struct daemon *self) {
 void daemon_exit(struct daemon *self, int exit_code) {
     daemon_delete(self);
     exit(exit_code);
+}
+
+void daemon_err(struct daemon *self, int priority, char *format, ...) {
+    va_list args;
+    if (priority < self->config->log_level) {
+        return;
+    }
+
+    va_start(args, format);
+    vlogger(stderr, priority, format, args);
+    if (self->log_file != NULL) {
+        vlogger(self->log_file, priority, format, args);
+    }
 }
 
 void daemon_log(struct daemon *self, int priority, char *format, ...) {
@@ -134,5 +155,12 @@ void daemon_run(struct daemon *self) {
         return;
     }
 
+    if (network_open_socket(self) == FAILURE) {
+        daemon_err(self, LOG_ERR, "Error creating server socket [%m]");
+        return;
+    }
+
     daemon_log(self, LOG_NOTICE, "Daemon started [%m]");
+
+    network_handle_socket(self);
 }

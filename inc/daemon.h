@@ -11,6 +11,8 @@ typedef struct daemon {
 
     FILE *log_file;
     int lock_fd;
+
+    int server_socket;
 } daemon_t;
 
 typedef int daemonize_status_t;

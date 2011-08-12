@@ -12,12 +12,13 @@ void test_config_new_and_delete_does_not_leak_memory(void **state) {
 }
 
 void test_config_parse_args(void **state) {
-    int argc = 9;
+    int argc = 11;
     char *argv[] = {
         "test_config",
         "-d",
         "-v",
         "--config", "config_filename",
+        "--port", "7357",
         "--flock", "lock_filename",
         "--log", "log_filename"
     };
@@ -27,6 +28,7 @@ void test_config_parse_args(void **state) {
     assert_int_equal(self->daemon, 1);
     assert_int_equal(self->log_level, LOG_DEBUG);
     assert_string_equal(self->config_filename, "config_filename");
+    assert_string_equal(self->port, "7357");
     assert_string_equal(self->lock_filename, "lock_filename");
     assert_string_equal(self->log_filename, "log_filename");
 
@@ -44,6 +46,7 @@ void test_config_default_args(void **state) {
     assert_int_equal(self->daemon, 0);
     assert_int_equal(self->log_level, LOG_NOTICE);
     assert_string_equal(self->config_filename, "daemon.conf");
+    assert_string_equal(self->port, "7357");
     assert_string_equal(self->lock_filename, "daemon.pid");
     assert_string_equal(self->log_filename, "daemon.log");
 

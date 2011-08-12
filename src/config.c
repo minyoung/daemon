@@ -8,13 +8,14 @@
 
 #include "logging.h"
 
-static const char *const args_short= "hsc:df:l:v";
+static const char *const args_short= "hsc:df:p:l:v";
 static const struct option args_long[] = {
     { "help",        0, NULL, 'h' },
     { "show",        0, NULL, 's' },
     { "config",      1, NULL, 'c' },
     { "daemon",      0, NULL, 'd' },
     { "flock",       1, NULL, 'f' },
+    { "port",        1, NULL, 'p' },
     { "log",         1, NULL, 'l' },
     { "verbose",     0, NULL, 'v' },
     { 0,             0, NULL,  0  }
@@ -92,6 +93,9 @@ status_t config_parse_args(struct config *self, int argc, char **argv) {
                 string_copy(&(self->lock_filename), optarg);
                 logger(stdout, LOG_DEBUG, "Setting lock file: %s", self->lock_filename);
                 break;
+            case 'p': // port
+                string_copy(&(self->port), optarg);
+                logger(stdout, LOG_DEBUG, "Setting port: %s", self->port);
             case 'l': // log file
                 string_copy(&(self->log_filename), optarg);
                 logger(stdout, LOG_DEBUG, "Setting log file: %s", self->log_filename);
@@ -124,6 +128,9 @@ int config_ini_handler(void *user, const char *section, const char *name, const 
         if (atoi(value) != 0) {
             self->log_level = LOG_DEBUG;
         }
+    } else if (MATCH("port")) {
+        string_copy(&(self->port), value);
+        logger(stdout, LOG_DEBUG, "Setting port: %s", self->port);
     } else if (MATCH("lock")) {
         string_copy(&(self->lock_filename), value);
         logger(stdout, LOG_DEBUG, "Setting lock file: %s", self->lock_filename);

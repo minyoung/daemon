@@ -14,6 +14,8 @@ typedef struct config {
     char *config_filename;
     char *log_filename;
     char *lock_filename;
+
+    char *port;
 } config_t;
 
 struct config *config_new();

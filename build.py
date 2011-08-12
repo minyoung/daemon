@@ -7,6 +7,7 @@ SOURCES = [
     'common.c',
     'config.c',
     'logging.c',
+    'network.c',
     'daemon.c',
     'main.c',
 ]
@@ -24,9 +25,13 @@ TESTS = {
         'test': ['test_logging.c'],
         'src': ['logging.c']
     },
+    'test_network': {
+        'test': ['test_network.c'],
+        'src': ['daemon.c', 'config.c', 'common.c', 'logging.c', 'network.c']
+    },
     'test_daemon': {
         'test': ['test_daemon.c'],
-        'src': ['daemon.c', 'config.c', 'common.c', 'logging.c']
+        'src': ['daemon.c', 'config.c', 'common.c', 'logging.c', 'network.c']
     },
 }
 
