@@ -13,6 +13,7 @@ typedef struct daemon {
     int lock_fd;
 
     int server_socket;
+    int running;
 } daemon_t;
 
 typedef int daemonize_status_t;

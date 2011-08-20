@@ -74,12 +74,12 @@ void test_network_can_receive_and_send_packets(void **state) {
         freeaddrinfo(result);
 
         struct packet pkt;
-        pkt.type = 'Q';
+        pkt.type = 'E';
         pkt.version = 1;
         pkt.len = 13;
         strncpy(pkt.message, "Hello world!\0", pkt.len);
 
-        int pkt_size = 17;
+        int pkt_size = pkt.len + 4;
         int read_size = 0;
         assert_int_equal(write(client_socket, &pkt, pkt_size), pkt_size);
         pkt.type = 0;
@@ -88,10 +88,16 @@ void test_network_can_receive_and_send_packets(void **state) {
         pkt.message[0] = 0;
         assert_int_equal(read(client_socket, &pkt, pkt_size), pkt_size);
 
-        assert_int_equal(pkt.type, 'Q');
+        assert_int_equal(pkt.type, 'E');
         assert_int_equal(pkt.version, 1);
         assert_int_equal(pkt.len, 13);
         assert_string_equal(pkt.message, "Hello world!\0");
+
+        pkt.type = 'Q';
+        pkt.len = 0;
+        pkt.message[0] = 0;
+        pkt_size = pkt.len + 4;
+        assert_int_equal(write(client_socket, &pkt, pkt_size), pkt_size);
     }
 
     daemon_delete(daemon);

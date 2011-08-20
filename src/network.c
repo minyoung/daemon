@@ -57,13 +57,29 @@ status_t network_open_socket(struct daemon *self) {
     return SUCCESS;
 }
 
+void network_handle_packet(struct daemon *self, struct packet *packet, struct sockaddr_in *client_addr) {
+    int client_len = sizeof(*client_addr);
+    int n;
+    switch (packet->type) {
+    case 'E':
+        n = sendto(self->server_socket, packet, sizeof(*packet), 0, (struct sockaddr *)client_addr, client_len);
+        if (n < 0) {
+            daemon_err(self, LOG_ERR, "Error writing to socket [%m]");
+            break;
+        }
+    case 'Q':
+        self->running = 0;
+        break;
+    }
+}
+
 void network_handle_socket(struct daemon *self) {
     struct sockaddr_in client_addr;
     int client_len = sizeof(client_addr);
     int n, s;
     char host[NI_MAXHOST], service[NI_MAXSERV];
     struct packet buffer;
-    while (1) {
+    while (self->running) {
         n = recvfrom(self->server_socket, &buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *)&client_addr, &client_len);
         if (n < 0) {
             daemon_err(self, LOG_ERR, "Error reading from socket [%m]");
@@ -77,15 +93,7 @@ void network_handle_socket(struct daemon *self) {
             daemon_log(self, LOG_WARNING, "getnameinfo: %s", gai_strerror(s));
         }
 
-        n = sendto(self->server_socket, &buffer, n, 0, (struct sockaddr *)&client_addr, client_len);
-        if (n < 0) {
-            daemon_err(self, LOG_ERR, "Error writing to socket [%m]");
-            continue;
-        }
-
-        if (buffer.type == 'Q') {
-            break;
-        }
+        network_handle_packet(self, &buffer, &client_addr);
     }
 }
 

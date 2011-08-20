@@ -26,6 +26,7 @@ struct daemon *daemon_new(struct config *config) {
             self->log_file = NULL;
         }
 
+        self->running = 1;
         daemon_log(self, LOG_DEBUG, "daemon created [%m]");
     }
 
