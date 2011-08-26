@@ -57,16 +57,18 @@ status_t network_open_socket(struct daemon *self) {
     return SUCCESS;
 }
 
-void network_handle_packet(struct daemon *self, struct packet *packet, struct sockaddr_in *client_addr) {
+void network_handle_packet(struct daemon *self, struct packet *packet, struct sockaddr *client_addr, char *host, char *service) {
     int client_len = sizeof(*client_addr);
     int n;
     switch (packet->type) {
     case 'E':
-        n = sendto(self->server_socket, packet, sizeof(*packet), 0, (struct sockaddr *)client_addr, client_len);
+        n = sendto(self->server_socket, packet, sizeof(*packet), 0, client_addr, client_len);
         if (n < 0) {
             daemon_err(self, LOG_ERR, "Error writing to socket [%m]");
-            break;
+        } else {
+            daemon_log(self, LOG_DEBUG, "Wrote %ld bytes to %s:%s", n, host, service);
         }
+        break;
     case 'Q':
         self->running = 0;
         break;
@@ -75,25 +77,26 @@ void network_handle_packet(struct daemon *self, struct packet *packet, struct so
 
 void network_handle_socket(struct daemon *self) {
     struct sockaddr_in client_addr;
+    struct sockaddr* client_sock = (struct sockaddr *)&client_addr;
     int client_len = sizeof(client_addr);
     int n, s;
     char host[NI_MAXHOST], service[NI_MAXSERV];
     struct packet buffer;
     while (self->running) {
-        n = recvfrom(self->server_socket, &buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *)&client_addr, &client_len);
+        n = recvfrom(self->server_socket, &buffer, sizeof(buffer), MSG_WAITALL, client_sock, &client_len);
         if (n < 0) {
             daemon_err(self, LOG_ERR, "Error reading from socket [%m]");
             continue;
         }
 
-        s = getnameinfo((struct sockaddr *)&client_addr, client_len, host, NI_MAXHOST, service, NI_MAXSERV, NI_NUMERICSERV);
+        s = getnameinfo(client_sock, client_len, host, NI_MAXHOST, service, NI_MAXSERV, NI_NUMERICSERV);
         if (s == 0) {
             daemon_log(self, LOG_DEBUG, "Received %ld bytes from %s:%s", n, host, service);
         } else {
             daemon_log(self, LOG_WARNING, "getnameinfo: %s", gai_strerror(s));
         }
 
-        network_handle_packet(self, &buffer, &client_addr);
+        network_handle_packet(self, &buffer, client_sock, host, service);
     }
 }
 
