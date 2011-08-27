@@ -93,10 +93,37 @@ status_t network_start_threads(struct daemon *self) {
     return SUCCESS;
 }
 
+void network_handle_stats_packet(struct daemon *self, struct packet *packet, int client_socket, struct sockaddr *client_addr, char *host, char *service) {
+    struct stats_packet pkt;
+    int offset = 0;
+
+    pkt.timestamp = *(u_int64_t *)(&packet->message[offset]);
+    offset = 8;
+
+    pkt.value = *(u_int64_t *)(&packet->message[offset]);
+    offset += 8;
+
+    pkt.service_len = *(u_int8_t *)(&packet->message[offset]);
+    offset += 1;
+
+    pkt.service = (char *)(&packet->message[offset]);
+    offset += pkt.service_len;
+
+    pkt.metric_len = *(u_int8_t *)(&packet->message[offset]);
+    offset += 1;
+
+    pkt.metric = (char *)(&packet->message[offset]);
+
+    daemon_log(self, LOG_DEBUG, "%s : %s = %lld (%lld)", pkt.service, pkt.metric, pkt.value, pkt.timestamp);
+}
+
 void network_handle_client_packet(struct daemon *self, struct packet *packet, int client_socket, struct sockaddr *client_addr, char *host, char *service) {
     int client_len = sizeof(*client_addr);
     int n;
     switch (packet->type) {
+    case 'S':
+        network_handle_stats_packet(self, packet, client_socket, client_addr, host, service);
+        /* break; */
     case 'E':
         n = sendto(client_socket, packet, packet->len + PACKET_HEADER_SIZE, 0, client_addr, client_len);
         if (n < 0) {
@@ -104,9 +131,6 @@ void network_handle_client_packet(struct daemon *self, struct packet *packet, in
         } else {
             daemon_log(self, LOG_DEBUG, "Wrote %ld bytes to %s:%s", n, host, service);
         }
-        break;
-    case 'Q':
-        self->running = 0;
         break;
     }
 }
