@@ -98,7 +98,7 @@ void network_handle_client_packet(struct daemon *self, struct packet *packet, in
     int n;
     switch (packet->type) {
     case 'E':
-        n = sendto(client_socket, packet, sizeof(*packet), 0, client_addr, client_len);
+        n = sendto(client_socket, packet, packet->len + PACKET_HEADER_SIZE, 0, client_addr, client_len);
         if (n < 0) {
             daemon_err(self, LOG_ERR, "Error writing to socket [%m]");
         } else {

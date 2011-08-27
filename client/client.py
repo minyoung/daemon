@@ -6,16 +6,18 @@ MAX_PACKET_LENGTH = MAX_MESSAGE_LENGTH + 4
 
 class DaemonPacket(object):
     VERSION = 1
-    FORMAT = struct.Struct("b c h %ss" % MAX_MESSAGE_LENGTH)
+    FORMAT = struct.Struct("b c h")
+    HEADER_SIZE = 4
     def __init__(self, packet):
-        data = DaemonPacket.FORMAT.unpack(packet)
-        self.version, self.type, self.message_length, self.message = data
-        self.message = self.message[:self.message_length]
+        header = DaemonPacket.FORMAT.unpack(packet[:DaemonPacket.HEADER_SIZE])
+        self.version, self.type, self.message_length = header
+        self.message = packet[DaemonPacket.HEADER_SIZE:][:self.message_length]
 
     @staticmethod
     def pack(message_type, message):
         message = message[:MAX_MESSAGE_LENGTH]
-        return DaemonPacket.FORMAT.pack(DaemonPacket.VERSION, message_type, len(message), message)
+        message_length = len(message)
+        return DaemonPacket.FORMAT.pack(DaemonPacket.VERSION, message_type, message_length) + message
 
     def __repr__(self):
         return repr((self.version, self.type, self.message))

@@ -1,6 +1,8 @@
 #ifndef PACKET_H
 #define PACKET_H
 
+#define PACKET_HEADER_SIZE 4
+
 typedef struct packet {
     char version;
     char type;
