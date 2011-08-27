@@ -3,8 +3,7 @@
 #include <netinet/in.h>
 #include <strings.h>
 #include <netdb.h>
-/* #include <sys/socket.h> */
-/* #include <sys/types.h> */
+#include <sys/time.h>
 
 #include "logging.h"
 #include "packet.h"
@@ -114,24 +113,40 @@ void network_handle_client_packet(struct daemon *self, struct packet *packet, in
 
 void *network_handle_client_socket(void *args) {
     struct daemon *self = (struct daemon *)args;
+
     struct sockaddr_in client_addr;
     struct sockaddr* client_sock = (struct sockaddr *)&client_addr;
     int client_len = sizeof(client_addr);
+
+    int client_socket = self->network_sockets[DAEMON_CLIENT];
+
     int n, s;
     char host[NI_MAXHOST], service[NI_MAXSERV];
     struct packet buffer;
-    int client_socket = self->network_sockets[DAEMON_CLIENT];
+
+    fd_set fds;
+    struct timeval timeout;
+
     daemon_log(self, LOG_DEBUG, "Client network thread started [%m]");
     while (self->running) {
+        FD_ZERO(&fds);
+        FD_SET(client_socket, &fds);
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 500000;
+        if (select(client_socket+1, &fds, NULL, NULL, &timeout) == 0) {
+            /* daemon_log(self, LOG_DEBUG, "No client requests [%m]"); */
+            continue;
+        }
+
         n = recvfrom(client_socket, &buffer, sizeof(buffer), MSG_WAITALL, client_sock, &client_len);
         if (n < 0) {
-            daemon_err(self, LOG_ERR, "Error reading from socket [%m]");
+            daemon_err(self, LOG_ERR, "Error reading from client socket [%m]");
             continue;
         }
 
         s = getnameinfo(client_sock, client_len, host, NI_MAXHOST, service, NI_MAXSERV, NI_NUMERICSERV);
         if (s == 0) {
-            daemon_log(self, LOG_DEBUG, "Received %ld bytes from %s:%s", n, host, service);
+            daemon_log(self, LOG_DEBUG, "Received %ld bytes from client %s:%s", n, host, service);
         } else {
             daemon_log(self, LOG_WARNING, "getnameinfo: %s", gai_strerror(s));
         }
