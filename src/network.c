@@ -156,15 +156,66 @@ void *network_handle_client_socket(void *args) {
     daemon_log(self, LOG_DEBUG, "Client network thread ending [%m]");
 }
 
+void network_handle_control_packet(struct daemon *self, struct packet *packet, int control_socket, struct sockaddr *client_addr, char *host, char *service) {
+    int client_len = sizeof(*client_addr);
+    int n;
+    switch (packet->type) {
+    case 'E':
+        n = sendto(control_socket, packet, packet->len + PACKET_HEADER_SIZE, 0, client_addr, client_len);
+        if (n < 0) {
+            daemon_err(self, LOG_ERR, "Error writing to socket [%m]");
+        } else {
+            daemon_log(self, LOG_DEBUG, "Wrote %ld bytes to %s:%s", n, host, service);
+        }
+        break;
+    case 'Q':
+        self->running = 0;
+        break;
+    }
+}
+
 void *network_handle_control_socket(void *args) {
     struct daemon *self = (struct daemon *)args;
     struct sockaddr_in client_addr;
     struct sockaddr* client_sock = (struct sockaddr *)&client_addr;
     int client_len = sizeof(client_addr);
+
+    int control_socket = self->network_sockets[DAEMON_CONTROL];
+
     int n, s;
     char host[NI_MAXHOST], service[NI_MAXSERV];
     struct packet buffer;
+
+    fd_set fds;
+    struct timeval timeout;
+
     daemon_log(self, LOG_DEBUG, "Control network thread started [%m]");
+    while(self->running) {
+        FD_ZERO(&fds);
+        FD_SET(control_socket, &fds);
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 500000;
+        if (select(control_socket+1, &fds, NULL, NULL, &timeout) == 0) {
+            /* daemon_log(self, LOG_DEBUG, "No control requests [%m]"); */
+            continue;
+        }
+
+        n = recvfrom(control_socket, &buffer, sizeof(buffer), MSG_WAITALL, client_sock, &client_len);
+        if (n < 0) {
+            daemon_err(self, LOG_ERR, "Error reading from control socket [%m]");
+            continue;
+        }
+
+        s = getnameinfo(client_sock, client_len, host, NI_MAXHOST, service, NI_MAXSERV, NI_NUMERICSERV);
+        if (s == 0) {
+            daemon_log(self, LOG_DEBUG, "Received %ld bytes from control %s:%s", n, host, service);
+        } else {
+            daemon_log(self, LOG_WARNING, "getnameinfo: %s", gai_strerror(s));
+        }
+
+        network_handle_control_packet(self, &buffer, control_socket, client_sock, host, service);
+    }
+
     daemon_log(self, LOG_DEBUG, "Control network thread ending [%m]");
 }
 
