@@ -8,15 +8,16 @@
 
 #include "logging.h"
 
-static const char *const args_short= "hsc:df:p:l:v";
+static const char *const args_short= "hsc:df:l:p:o:v";
 static const struct option args_long[] = {
     { "help",        0, NULL, 'h' },
     { "show",        0, NULL, 's' },
     { "config",      1, NULL, 'c' },
     { "daemon",      0, NULL, 'd' },
     { "flock",       1, NULL, 'f' },
-    { "port",        1, NULL, 'p' },
     { "log",         1, NULL, 'l' },
+    { "port",        1, NULL, 'p' },
+    { "control",     1, NULL, 'o' },
     { "verbose",     0, NULL, 'v' },
     { 0,             0, NULL,  0  }
 };
@@ -29,6 +30,8 @@ struct config *config_new() {
         logger(stdout, LOG_DEBUG, "config created");
         self->log_filename = NULL;
         self->lock_filename = NULL;
+        self->client_port = NULL;
+        self->control_port = NULL;
     }
 
     return self;
@@ -54,12 +57,18 @@ void config_print_usage(struct config *self, FILE *stream) {
             "                               Default: %s\n"
             "  --log=arg        -l      Specify log file\n"
             "                               Default: %s\n"
+            "  --port=arg       -p      Specify client port number\n"
+            "                               Default: %s\n"
+            "  --control=arg    -o      Specify server control port number\n"
+            "                               Default: %s\n"
             "  --verbose        -v      Output verbose information\n"
             "                               Default: %s\n",
         "false",
         DEFAULT_CONFIG_FILE,
         DEFAULT_LOCK_FILE,
         DEFAULT_LOG_FILE,
+        DEFAULT_CLIENT_PORT,
+        DEFAULT_CONTROL_PORT,
         "false"
     );
 }
@@ -75,6 +84,8 @@ status_t config_parse_args(struct config *self, int argc, char **argv) {
     string_copy(&self->lock_filename, DEFAULT_LOCK_FILE);
     string_copy(&self->log_filename, DEFAULT_LOG_FILE);
     self->log_level = DEFAULT_LOG_LEVEL;
+    string_copy(&self->client_port, DEFAULT_CLIENT_PORT);
+    string_copy(&self->control_port, DEFAULT_CONTROL_PORT);
 
     do {
         next = getopt_long(argc, argv, args_short, args_long, &index);
@@ -93,9 +104,12 @@ status_t config_parse_args(struct config *self, int argc, char **argv) {
                 string_copy(&(self->lock_filename), optarg);
                 logger(stdout, LOG_DEBUG, "Setting lock file: %s", self->lock_filename);
                 break;
-            case 'p': // port
-                string_copy(&(self->port), optarg);
-                logger(stdout, LOG_DEBUG, "Setting port: %s", self->port);
+            case 'p': // client port
+                string_copy(&(self->client_port), optarg);
+                logger(stdout, LOG_DEBUG, "Setting client port: %s", self->client_port);
+            case 'o': // control port
+                string_copy(&(self->control_port), optarg);
+                logger(stdout, LOG_DEBUG, "Setting control port: %s", self->control_port);
             case 'l': // log file
                 string_copy(&(self->log_filename), optarg);
                 logger(stdout, LOG_DEBUG, "Setting log file: %s", self->log_filename);
@@ -129,8 +143,11 @@ int config_ini_handler(void *user, const char *section, const char *name, const 
             self->log_level = LOG_DEBUG;
         }
     } else if (MATCH("port")) {
-        string_copy(&(self->port), value);
-        logger(stdout, LOG_DEBUG, "Setting port: %s", self->port);
+        string_copy(&(self->client_port), value);
+        logger(stdout, LOG_DEBUG, "Setting client port: %s", self->client_port);
+    } else if (MATCH("control")) {
+        string_copy(&(self->control_port), value);
+        logger(stdout, LOG_DEBUG, "Setting control port: %s", self->control_port);
     } else if (MATCH("lock")) {
         string_copy(&(self->lock_filename), value);
         logger(stdout, LOG_DEBUG, "Setting lock file: %s", self->lock_filename);

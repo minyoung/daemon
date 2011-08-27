@@ -1,6 +1,7 @@
 #ifndef DAEMON_H
 #define DAEMON_H
 
+#include <pthread.h>
 #include <unistd.h>
 
 #include "config.h"
@@ -12,14 +13,18 @@ typedef struct daemon {
     FILE *log_file;
     int lock_fd;
 
-    int server_socket;
     int running;
+    pthread_t network_threads[2];
+    int network_sockets[2];
 } daemon_t;
 
 typedef int daemonize_status_t;
 const daemonize_status_t DAEMONIZE_SUCCESS;
 const daemonize_status_t DAEMONIZE_FAILURE;
 const daemonize_status_t DAEMON_DAEMONIZED;
+
+const int DAEMON_CONTROL;
+const int DAEMON_CLIENT;
 
 struct daemon *daemon_new(struct config *config);
 void daemon_delete(struct daemon *self);

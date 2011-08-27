@@ -7,6 +7,8 @@
 #define DEFAULT_LOCK_FILE "daemon.pid"
 #define DEFAULT_LOG_FILE "daemon.log"
 #define DEFAULT_LOG_LEVEL LOG_NOTICE
+#define DEFAULT_CLIENT_PORT "10180"
+#define DEFAULT_CONTROL_PORT "10181"
 
 typedef struct config {
     int daemon;
@@ -15,7 +17,8 @@ typedef struct config {
     char *log_filename;
     char *lock_filename;
 
-    char *port;
+    char *client_port;
+    char *control_port;
 } config_t;
 
 struct config *config_new();

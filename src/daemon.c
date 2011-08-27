@@ -12,6 +12,9 @@ const daemonize_status_t DAEMONIZE_SUCCESS = 0;
 const daemonize_status_t DAEMONIZE_FAILURE = 1;
 const daemonize_status_t DAEMON_DAEMONIZED = 2;
 
+const int DAEMON_CONTROL = 0;
+const int DAEMON_CLIENT = 1;
+
 void daemon_log(struct daemon *self, int priority, char *format, ...);
 
 struct daemon *daemon_new(struct config *config) {
@@ -26,6 +29,12 @@ struct daemon *daemon_new(struct config *config) {
             self->log_file = NULL;
         }
 
+        self->network_sockets[0] = 0;
+        self->network_sockets[1] = 0;
+
+        self->network_threads[0] = 0;
+        self->network_threads[1] = 0;
+
         self->running = 1;
         daemon_log(self, LOG_DEBUG, "daemon created [%m]");
     }
@@ -35,7 +44,7 @@ struct daemon *daemon_new(struct config *config) {
 
 void daemon_delete(struct daemon *self) {
     if (self != NULL) {
-        network_close_socket(self);
+        network_close_sockets(self);
         config_delete(self->config);
         self->config = NULL;
 
@@ -156,12 +165,18 @@ void daemon_run(struct daemon *self) {
         return;
     }
 
-    if (network_open_socket(self) == FAILURE) {
+    if (network_open_sockets(self) == FAILURE) {
         daemon_err(self, LOG_ERR, "Error creating server socket [%m]");
+        return;
+    }
+
+    if (network_start_threads(self) == FAILURE) {
+        daemon_err(self, LOG_ERR, "Could not start network threads [%m]");
         return;
     }
 
     daemon_log(self, LOG_NOTICE, "Daemon started [%m]");
 
-    network_handle_socket(self);
+    pthread_join(self->network_threads[DAEMON_CONTROL], NULL);
+    pthread_join(self->network_threads[DAEMON_CLIENT], NULL);
 }

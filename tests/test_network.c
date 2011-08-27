@@ -17,7 +17,7 @@ void test_network_can_open_a_socket(void **state) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
     config = config_new();
-    config->port = "7357";
+    config->client_port = "7357";
     daemon = daemon_new(config);
 
     assert(network_open_socket(daemon) == SUCCESS);
@@ -29,7 +29,7 @@ void test_network_can_receive_and_send_packets(void **state) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
     config = config_new();
-    config->port = "7357";
+    config->client_port = "7357";
     daemon = daemon_new(config);
 
     int fd[2];
@@ -41,9 +41,10 @@ void test_network_can_receive_and_send_packets(void **state) {
 
     if (pid == 0) {
         // parent
-        assert(network_open_socket(daemon) == SUCCESS);
+        daemon->network_sockets[DAEMON_CLIENT] = network_open_socket(daemon, "7357");
+        assert(daemon->network_sockets[DAEMON_CLIENT] != 0);
         write(fd[1], buf, 1);
-        network_handle_socket(daemon);
+        network_handle_client_socket(daemon);
     } else {
         // child
         read(fd[0], buf, 1);

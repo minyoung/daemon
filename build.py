@@ -48,7 +48,7 @@ BINARY = 'daemon'
 CC = 'gcc'
 CFLAGS = ['-g']
 INCLUDES = [PATHS['inc'], os.path.join(PATHS['lib'], 'inc')]
-LIBRARIES = ['-L%s' % PATHS['lib'], '-lini']
+LIBRARIES = ['-L%s' % PATHS['lib'], '-lini', '-lpthread']
 DEFINES = []
 
 INCLUDES = ['-I%s' % inc for inc in INCLUDES]
