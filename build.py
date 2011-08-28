@@ -8,6 +8,7 @@ SOURCES = [
     'config.c',
     'logging.c',
     'network.c',
+    'packet.c',
     'daemon.c',
     'main.c',
 ]
