@@ -95,9 +95,6 @@ struct log_packet *log_packet_new(struct packet *packet) {
     self->timestamp = *(u_int64_t *)(&packet->message[offset]);
     offset = 8;
 
-    char string_len = *(u_int8_t *)(&packet->message[offset]);
-    offset += 1;
-
     read_string(&self->service, packet->message, &offset);
     read_string(&self->log_line, packet->message, &offset);
     read_string(&self->hostname, packet->message, &offset);

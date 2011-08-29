@@ -28,11 +28,15 @@ TESTS = {
     },
     'test_network': {
         'test': ['test_network.c'],
-        'src': ['daemon.c', 'config.c', 'common.c', 'logging.c', 'network.c']
+        'src': ['daemon.c', 'config.c', 'common.c', 'logging.c', 'network.c', 'packet.c']
     },
     'test_daemon': {
         'test': ['test_daemon.c'],
-        'src': ['daemon.c', 'config.c', 'common.c', 'logging.c', 'network.c']
+        'src': ['daemon.c', 'config.c', 'common.c', 'logging.c', 'network.c', 'packet.c']
+    },
+    'test_packet': {
+        'test': ['test_packet.c'],
+        'src': ['packet.c', 'common.c', 'logging.c']
     },
 }
 
