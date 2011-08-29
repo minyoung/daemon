@@ -1,44 +1,18 @@
 #!/usr/bin/env python
 
 from fabricate import *
+import glob
 import os
 
-SOURCES = [
-    'common.c',
-    'config.c',
-    'logging.c',
-    'network.c',
-    'packet.c',
-    'daemon.c',
-    'main.c',
-]
 
-TESTS = {
-    'test_common': {
-        'test': ['test_common.c'],
-        'src': ['common.c']
-    },
-    'test_config': {
-        'test': ['test_config.c'],
-        'src': ['config.c', 'common.c', 'logging.c']
-    },
-    'test_logging': {
-        'test': ['test_logging.c'],
-        'src': ['logging.c']
-    },
-    'test_network': {
-        'test': ['test_network.c'],
-        'src': ['daemon.c', 'config.c', 'common.c', 'logging.c', 'network.c', 'packet.c']
-    },
-    'test_daemon': {
-        'test': ['test_daemon.c'],
-        'src': ['daemon.c', 'config.c', 'common.c', 'logging.c', 'network.c', 'packet.c']
-    },
-    'test_packet': {
-        'test': ['test_packet.c'],
-        'src': ['packet.c', 'common.c', 'logging.c']
-    },
-}
+def find_files(base, globbing):
+    files = glob.glob("%s/%s" % (base, globbing))
+    base_len = len(base)+1
+    return [path[base_len:] for path in files]
+
+def object_name(src, prepend=''):
+    return os.path.join(PATHS['obj'], prepend + src.replace('.c', '.o'))
+
 
 PATHS = {
     'bin': 'bin',
@@ -49,6 +23,9 @@ PATHS = {
     'lib': '.libs',
 }
 
+SOURCES = find_files(PATHS['src'], '*.c')
+TEST_FILES = find_files(PATHS['test'], 'test_*.c')
+
 BINARY = 'daemon'
 CC = 'gcc'
 CFLAGS = ['-g']
@@ -58,8 +35,10 @@ DEFINES = []
 
 INCLUDES = ['-I%s' % inc for inc in INCLUDES]
 
-def object_name(src, prepend=''):
-    return os.path.join(PATHS['obj'], prepend + src.replace('.c', '.o'))
+
+def all():
+    build()
+    tests()
 
 def build():
     '''build main program binary'''
@@ -73,12 +52,11 @@ def tests():
     '''build tests'''
     DEFINES.append('-DUNIT_TESTING')
     LIBRARIES.append('-lcmockery')
-    for binary, files in TESTS.items():
-        objects = {}
-        for path, sources in files.items():
-            for src in sources:
-                objects[os.path.join(PATHS[path], src)] = object_name(src, '_')
-        build_binary(os.path.join(PATHS['bin'], binary), objects)
+    objects = {}
+    for src in SOURCES:
+        objects[os.path.join(PATHS['src'], src)] = object_name(src, '_')
+    for test in TEST_FILES:
+        build_binary(os.path.join(PATHS['bin'], test), objects)
 
 def build_binary(binary, objects):
     compile(objects)
