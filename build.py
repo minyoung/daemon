@@ -30,7 +30,7 @@ BINARY = 'daemon'
 CC = 'gcc'
 CFLAGS = ['-g']
 INCLUDES = [PATHS['inc'], os.path.join(PATHS['lib'], 'inc')]
-LIBRARIES = ['-L%s' % PATHS['lib'], '-lini', '-lpthread']
+LIBRARIES = ['-L%s' % PATHS['lib'], '-lini', '-lpthread', '-lssl']
 DEFINES = []
 
 INCLUDES = ['-I%s' % inc for inc in INCLUDES]
@@ -54,9 +54,13 @@ def tests():
     LIBRARIES.append('-lcmockery')
     objects = {}
     for src in SOURCES:
+        if src == 'main.c':
+            continue
         objects[os.path.join(PATHS['src'], src)] = object_name(src, '_')
     for test in TEST_FILES:
-        build_binary(os.path.join(PATHS['bin'], test), objects)
+        objects[os.path.join(PATHS['test'], test)] = object_name(test, '_')
+        build_binary(os.path.join(PATHS['bin'], test[:-2]), objects)
+        del objects[os.path.join(PATHS['test'], test)]
 
 def build_binary(binary, objects):
     compile(objects)

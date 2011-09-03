@@ -8,6 +8,7 @@
 
 #include "logging.h"
 #include "packet.h"
+#include "storage.h"
 
 void *network_handle_client_socket(void *args);
 void *network_handle_control_socket(void *args);
@@ -103,8 +104,11 @@ void network_handle_client_packet(struct daemon *self, struct packet *packet, in
     switch (packet->type) {
     case 'S':
         pkt = stats_packet_new(packet);
-        tags = malloc(pkt->tag_count * 28 * sizeof(char));
+        if (storage_store_stats(self, pkt) != SUCCESS) {
+        } else {
+        }
 
+        tags = malloc(pkt->tag_count * 28 * sizeof(char));
         tags[0] = 0;
         if (pkt->tag_count > 0) {
             sprintf(tags, "'%s'", pkt->tags[0]);
@@ -116,6 +120,7 @@ void network_handle_client_packet(struct daemon *self, struct packet *packet, in
         daemon_log(self, LOG_DEBUG, "Tags (%d): %s", pkt->tag_count, tags);
         stats_packet_delete(pkt);
         /* break; */
+
     case 'L':
     case 'E':
         n = sendto(client_socket, packet, packet->len + PACKET_HEADER_SIZE, 0, client_addr, client_len);
