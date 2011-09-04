@@ -29,6 +29,7 @@ struct config *config_new() {
     if (self = malloc(sizeof(*self))) {
         logger(stdout, LOG_DEBUG, "config created");
         self->log_level = LOG_DEBUG;
+        self->config_filename = NULL;
         self->log_filename = NULL;
         self->lock_filename = NULL;
         self->client_port = NULL;
@@ -40,6 +41,11 @@ struct config *config_new() {
 
 void config_delete(struct config *self) {
     if (self != NULL) {
+        free_pointer(&self->config_filename);
+        free_pointer(&self->log_filename);
+        free_pointer(&self->lock_filename);
+        free_pointer(&self->client_port);
+        free_pointer(&self->control_port);
         free(self);
     }
 }

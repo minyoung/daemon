@@ -11,9 +11,9 @@ char *string_copy(char **dest, const char *src) {
         return strdup(src);
     }
 
-    /* if (*dest != NULL) { */
-        /* free(*dest); */
-    /* } */
+    if (*dest != NULL) {
+        free(*dest);
+    }
     *dest = strdup(src);
     return *dest;
 }

@@ -37,14 +37,15 @@ START_TEST (check_hash_value) {
     struct daemon *daemon = NULL;
 
     daemon = stub_daemon();
-    packet = malloc(sizeof(*packet));
+    packet = stub_stats_packet();
     string_copy(&packet->service, "service");
     string_copy(&packet->metric, "metric");
 
     result = storage_get_stats_hash(daemon, packet);
 
     ck_assert_memory_eq(hash, result, sizeof(hash));
-    free(packet);
+    free(result);
+    stats_packet_delete(packet);
     daemon_delete(daemon);
 }
 END_TEST
@@ -75,6 +76,7 @@ START_TEST (check_storage_data_filename) {
     char *filename = storage_format_data_filename(daemon, "12345678911234567892");
     ck_assert_str_eq(filename, "12/34/5678911234567892");
 
+    free(filename);
     daemon_delete(daemon);
 }
 END_TEST

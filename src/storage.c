@@ -34,6 +34,7 @@ status_t storage_create_paths(struct daemon *self, unsigned char *hash) {
 
 char *storage_format_data_filename(struct daemon *self, unsigned char *hash) {
     char *fullpath = malloc(sizeof(char) * 23);
+
     strncpy(&fullpath[0], &hash[0], 2);
     fullpath[2] = '/';
     strncpy(&fullpath[3], &hash[2], 2);
@@ -139,8 +140,10 @@ status_t storage_store_stats_data(struct daemon *self, unsigned char *hash, cons
     char *fullpath = storage_format_data_filename(self, hash);
 
     if (access(fullpath, R_OK | W_OK) == 0) {
+        free(fullpath);
         return storage_append_stats_file(self, fullpath, packet);
     } else {
+        free(fullpath);
         return storage_create_new_stats_file(self, fullpath, packet);
     }
 }

@@ -73,6 +73,14 @@ struct stats_packet *stats_packet_new(struct packet *packet) {
 
 void stats_packet_delete(struct stats_packet *self) {
     if (self != NULL) {
+        free(self->type);
+        free(self->service);
+        free(self->metric);
+        free(self->hostname);
+        int i = 0;
+        for (i = 0; i < self->tag_count; i++) {
+            free(self->tags[i]);
+        }
         free(self->tags);
         free(self);
     }

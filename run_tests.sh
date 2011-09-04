@@ -2,7 +2,7 @@
 
 FAILED_TESTS=""
 pushd bin
-for t in test_*; do
+for t in check_*; do
     echo "== Running $t =="
     ./$t || FAILED_TESTS="$FAILED_TESTS $t"
     echo
