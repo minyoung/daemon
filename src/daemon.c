@@ -6,7 +6,6 @@
 
 #include "common.h"
 #include "logging.h"
-#include "unit_testing.h"
 
 const daemonize_status_t DAEMONIZE_SUCCESS = 0;
 const daemonize_status_t DAEMONIZE_FAILURE = 1;

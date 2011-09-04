@@ -1,14 +1,11 @@
-#include <assert.h>
-#include <string.h>
-#include "unit_testing.h"
-
 #include "logging.h"
+#include "checkhelper.c"
 
 void test_logging_level(int priority, char *message, char *expected) {
     int fd[2];
     char str[64];
     FILE *output_stream;
-    assert(pipe(fd) == 0);
+    ck_assert(pipe(fd) == 0);
     output_stream = fdopen(fd[1], "w");
     /*
      * fdopen: fd -> stream
@@ -18,15 +15,15 @@ void test_logging_level(int priority, char *message, char *expected) {
     logger(output_stream, priority, message);
     fclose(output_stream);
 
-    assert(read(fd[0], str, sizeof(str)) > 0);
-    /* assert(strncmp(str, "yyyy-mm-dd HH:MM:SS UTC [DEBUG]: test")); */
-    assert(strncmp(&str[24], expected, strlen(expected)) == 0);
+    ck_assert(read(fd[0], str, sizeof(str)) > 0);
+    /* ck_assert(strncmp(str, "yyyy-mm-dd HH:MM:SS UTC [DEBUG]: test")); */
+    ck_assert(strncmp(&str[24], expected, strlen(expected)) == 0);
 
     close(fd[0]);
     close(fd[1]);
 }
 
-void test_basic_logging(void **state) {
+START_TEST (check_basic_logging) {
     test_logging_level(LOG_DEBUG,   "test", "[DEBUG]: test");
     test_logging_level(LOG_INFO,    "test", "[INFO]: test");
     test_logging_level(LOG_NOTICE,  "test", "[NOTICE]: test");
@@ -36,10 +33,14 @@ void test_basic_logging(void **state) {
     test_logging_level(LOG_ALERT,   "test", "[ALERT]: test");
     test_logging_level(LOG_EMERG,   "test", "[EMERGENCY]: test");
 }
+END_TEST
 
-int main(int argc, char **argv) {
-    const UnitTest tests[] = {
-        unit_test(test_basic_logging),
-    };
-    return run_tests(tests);
+Suite *check_suite(void) {
+    Suite *s = suite_create("check logging");
+
+    TCase *tc_core = tcase_create("Logging");
+    tcase_add_test(tc_core, check_basic_logging);
+    suite_add_tcase(s, tc_core);
+
+    return s;
 }

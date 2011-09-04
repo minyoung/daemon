@@ -1,31 +1,31 @@
-#include <assert.h>
+#include "daemon.h"
+#include "checkhelper.c"
 
 #include <fcntl.h>
-#include "unit_testing.h"
 
-#include "daemon.h"
-
-void test_daemon_new_and_delete_does_not_leak_memory(void **state) {
+START_TEST (check_daemon_new_and_delete) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
     config = config_new();
     daemon = daemon_new(config);
     daemon_delete(daemon);
 }
+END_TEST
 
-void test_daemon_can_flock_a_file(void **state) {
+START_TEST (check_daemon_can_flock_a_file) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
     config = config_new();
     config->lock_filename = "test.lock";
     daemon = daemon_new(config);
 
-    assert_int_equal(daemon_get_lock(daemon), SUCCESS);
+    ck_assert(daemon_get_lock(daemon) == SUCCESS);
 
     daemon_delete(daemon);
 }
+END_TEST
 
-void test_daemon_fails_to_flock_an_already_flocked_file(void **state) {
+START_TEST (check_daemon_fails_to_flock_an_already_flocked_file) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
     config = config_new();
@@ -34,8 +34,8 @@ void test_daemon_fails_to_flock_an_already_flocked_file(void **state) {
 
     int to_parent[2];
     int to_child[2];
-    assert(pipe(to_parent) == 0);
-    assert(pipe(to_child) == 0);
+    ck_assert(pipe(to_parent) == 0);
+    ck_assert(pipe(to_child) == 0);
     int lock_fd = 0;
     struct flock lock = {
         .l_type = F_WRLCK,
@@ -45,36 +45,40 @@ void test_daemon_fails_to_flock_an_already_flocked_file(void **state) {
         .l_pid = 1
     };
     pid_t pid = fork();
-    assert(pid >= 0);
+    ck_assert(pid >= 0);
     char buf[1];
 
     if (pid == 0) {
         // parent
         read(to_parent[0], buf, 1);
-        assert_int_equal(daemon_get_lock(daemon), FAILURE);
+        ck_assert(daemon_get_lock(daemon) == FAILURE);
         write(to_child[1], buf, 1);
         read(to_parent[0], buf, 1);
-        assert_int_equal(daemon_get_lock(daemon), SUCCESS);
+        ck_assert(daemon_get_lock(daemon) == SUCCESS);
     } else {
         // child
         lock_fd = open(config->lock_filename, O_RDWR | O_CREAT, 0640);
-        assert_int_not_equal(lock_fd, -1);
-        assert_int_not_equal(fcntl(lock_fd, F_SETLK, &lock), -1);
+        ck_assert_int_ne(lock_fd, -1);
+        ck_assert(fcntl(lock_fd, F_SETLK, &lock) != -1);
         write(to_parent[1], buf, 1);
         read(to_child[0], buf, 1);
         lock.l_type = F_UNLCK;
-        assert_int_not_equal(fcntl(lock_fd, F_SETLK, &lock), -1);
+        ck_assert(fcntl(lock_fd, F_SETLK, &lock) != -1);
         write(to_parent[1], buf, 1);
     }
 
     daemon_delete(daemon);
 }
+END_TEST
 
-int main(int argc, char **argv) {
-    const UnitTest tests[] = {
-        unit_test(test_daemon_new_and_delete_does_not_leak_memory),
-        unit_test(test_daemon_can_flock_a_file),
-        unit_test(test_daemon_fails_to_flock_an_already_flocked_file),
-    };
-    return run_tests(tests);
+Suite *check_suite(void) {
+    Suite *s = suite_create("check daemon");
+
+    TCase *tc_core = tcase_create("Daemon");
+    tcase_add_test(tc_core, check_daemon_new_and_delete);
+    tcase_add_test(tc_core, check_daemon_can_flock_a_file);
+    tcase_add_test(tc_core, check_daemon_fails_to_flock_an_already_flocked_file);
+    suite_add_tcase(s, tc_core);
+
+    return s;
 }

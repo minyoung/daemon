@@ -24,7 +24,7 @@ PATHS = {
 }
 
 SOURCES = find_files(PATHS['src'], '*.c')
-TEST_FILES = find_files(PATHS['test'], 'test_*.c')
+TEST_FILES = find_files(PATHS['test'], 'check_*.c')
 
 BINARY = 'daemon'
 CC = 'gcc'
@@ -51,7 +51,7 @@ def build():
 def tests():
     '''build tests'''
     DEFINES.append('-DUNIT_TESTING')
-    LIBRARIES.append('-lcmockery')
+    LIBRARIES.append('-lcheck')
     objects = {}
     for src in SOURCES:
         if src == 'main.c':

@@ -1,4 +1,6 @@
-#include <assert.h>
+#include "network.h"
+#include "checkhelper.c"
+
 #include <netinet/in.h>
 #include <netdb.h>
 #include <string.h>
@@ -6,26 +8,24 @@
 /* #include <sys/socket.h> */
 /* #include <sys/types.h> */
 
-#include "unit_testing.h"
-
 #include "common.h"
 #include "daemon.h"
-#include "network.h"
 #include "packet.h"
 
-void test_network_can_open_a_socket(void **state) {
+START_TEST (check_network_can_open_a_socket) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
     config = config_new();
     config->client_port = "7357";
     daemon = daemon_new(config);
 
-    assert(network_open_socket(daemon) == SUCCESS);
+    ck_assert(network_open_socket(daemon) == SUCCESS);
 
     daemon_delete(daemon);
 }
+END_TEST
 
-void test_network_can_receive_and_send_packets(void **state) {
+START_TEST (check_network_can_receive_and_send_packets) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
     config = config_new();
@@ -34,15 +34,15 @@ void test_network_can_receive_and_send_packets(void **state) {
 
     int fd[2];
     char buf[1];
-    assert(pipe(fd) == 0);
+    ck_assert(pipe(fd) == 0);
 
     pid_t pid = fork();
-    assert(pid >= 0);
+    ck_assert(pid >= 0);
 
     if (pid == 0) {
         // parent
         daemon->network_sockets[DAEMON_CLIENT] = network_open_socket(daemon, "7357");
-        assert(daemon->network_sockets[DAEMON_CLIENT] != 0);
+        ck_assert(daemon->network_sockets[DAEMON_CLIENT] != 0);
         write(fd[1], buf, 1);
         network_handle_client_socket(daemon);
     } else {
@@ -56,7 +56,7 @@ void test_network_can_receive_and_send_packets(void **state) {
         hints.ai_socktype = SOCK_DGRAM;
         hints.ai_flags = 0;
         hints.ai_protocol = 0;
-        assert_int_equal(getaddrinfo("localhost", "7357", &hints, &result), 0);
+        ck_assert(getaddrinfo("localhost", "7357", &hints, &result) == 0);
 
         struct addrinfo *rp;
         int client_socket;
@@ -71,7 +71,7 @@ void test_network_can_receive_and_send_packets(void **state) {
 
             close(client_socket);
         }
-        assert(rp != NULL);
+        ck_assert(rp != NULL);
         freeaddrinfo(result);
 
         struct packet pkt;
@@ -82,33 +82,36 @@ void test_network_can_receive_and_send_packets(void **state) {
 
         int pkt_size = pkt.len + 4;
         int read_size = 0;
-        assert_int_equal(write(client_socket, &pkt, pkt_size), pkt_size);
+        ck_assert(write(client_socket, &pkt, pkt_size) == pkt_size);
         pkt.type = 0;
         pkt.version = 0;
         pkt.len = 0;
         pkt.message[0] = 0;
-        assert_int_equal(read(client_socket, &pkt, pkt_size), pkt_size);
+        ck_assert(read(client_socket, &pkt, pkt_size) == pkt_size);
 
-        assert_int_equal(pkt.type, 'E');
-        assert_int_equal(pkt.version, 1);
-        assert_int_equal(pkt.len, 13);
-        assert_string_equal(pkt.message, "Hello world!\0");
+        ck_assert_int_eq(pkt.type, 'E');
+        ck_assert_int_eq(pkt.version, 1);
+        ck_assert_int_eq(pkt.len, 13);
+        ck_assert_str_eq(pkt.message, "Hello world!\0");
 
         pkt.type = 'Q';
         pkt.len = 0;
         pkt.message[0] = 0;
         pkt_size = pkt.len + 4;
-        assert_int_equal(write(client_socket, &pkt, pkt_size), pkt_size);
+        ck_assert(write(client_socket, &pkt, pkt_size) == pkt_size);
     }
 
     daemon_delete(daemon);
 }
+END_TEST
 
-int main(int argc, char **argv) {
-    const UnitTest tests[] = {
-        unit_test(test_network_can_open_a_socket),
-        unit_test(test_network_can_receive_and_send_packets),
-    };
-    return run_tests(tests);
+Suite *check_suite(void) {
+    Suite *s = suite_create("check network");
+
+    TCase *tc_core = tcase_create("Network");
+    tcase_add_test(tc_core, check_network_can_open_a_socket);
+    tcase_add_test(tc_core, check_network_can_receive_and_send_packets);
+    suite_add_tcase(s, tc_core);
+
+    return s;
 }
-

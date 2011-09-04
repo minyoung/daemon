@@ -1,19 +1,14 @@
-#include <assert.h>
-#include "unit_testing.h"
-
 #include "packet.h"
+#include "checkhelper.c"
 
-#include <string.h>
-
-#include <stdio.h>
-
-void test_packet_new_and_delete_does_not_leak_memory(void **state) {
+START_TEST (check_packet_new_and_delete) {
     struct packet *self = NULL;
     self = packet_new();
     packet_delete(self);
 }
+END_TEST
 
-void test_stats_packet_new_extracts_the_correct_values(void **state) {
+START_TEST (check_stats_packet_new_extracts_the_correct_values) {
     struct packet *packet = NULL;
     char d[] = {
         /* timestamp */
@@ -33,17 +28,18 @@ void test_stats_packet_new_extracts_the_correct_values(void **state) {
 
     struct stats_packet *self = NULL;
     self = stats_packet_new(packet);
-    assert(1 == self->timestamp);
-    assert(2 == self->value);
-    assert_string_equal(self->service, "service");
-    assert_string_equal(self->metric, "metric");
-    assert_string_equal(self->hostname, "hostname");
-    assert_int_equal(self->tag_count, 0);
+    ck_assert(1 == self->timestamp);
+    ck_assert(2 == self->value);
+    ck_assert_str_eq(self->service, "service");
+    ck_assert_str_eq(self->metric, "metric");
+    ck_assert_str_eq(self->hostname, "hostname");
+    ck_assert_int_eq(self->tag_count, 0);
 
     stats_packet_delete(self);
 }
+END_TEST
 
-void test_stats_packet_new_handles_null_padded_strings(void **state) {
+START_TEST (check_stats_packet_new_handles_null_padded_strings) {
     struct packet *packet = NULL;
     char d[] = {
         /* timestamp */
@@ -66,19 +62,20 @@ void test_stats_packet_new_handles_null_padded_strings(void **state) {
 
     struct stats_packet *self = NULL;
     self = stats_packet_new(packet);
-    assert(1 == self->timestamp);
-    assert(2 == self->value);
-    assert_string_equal(self->service, "service");
-    assert_string_equal(self->metric, "metric");
-    assert_string_equal(self->hostname, "hostname");
-    assert_int_equal(self->tag_count, 2);
-    assert_string_equal(self->tags[0], "tag1");
-    assert_string_equal(self->tags[1], "tag2");
+    ck_assert(1 == self->timestamp);
+    ck_assert(2 == self->value);
+    ck_assert_str_eq(self->service, "service");
+    ck_assert_str_eq(self->metric, "metric");
+    ck_assert_str_eq(self->hostname, "hostname");
+    ck_assert_int_eq(self->tag_count, 2);
+    ck_assert_str_eq(self->tags[0], "tag1");
+    ck_assert_str_eq(self->tags[1], "tag2");
 
     stats_packet_delete(self);
 }
+END_TEST
 
-void test_log_packet_new_extracts_the_correct_values(void **state) {
+START_TEST (check_log_packet_new_extracts_the_correct_values) {
     struct packet *packet = NULL;
     char d[] = {
         /* timestamp */
@@ -98,21 +95,25 @@ void test_log_packet_new_extracts_the_correct_values(void **state) {
 
     struct log_packet *self = NULL;
     self = log_packet_new(packet);
-    assert(1 == self->timestamp);
-    assert_string_equal(self->service, "service");
-    assert_string_equal(self->log_line, "log line");
-    assert_string_equal(self->hostname, "hostname");
-    assert_int_equal(self->tag_count, 1);
+    ck_assert(1 == self->timestamp);
+    ck_assert_str_eq(self->service, "service");
+    ck_assert_str_eq(self->log_line, "log line");
+    ck_assert_str_eq(self->hostname, "hostname");
+    ck_assert_int_eq(self->tag_count, 1);
 
     log_packet_delete(self);
 }
+END_TEST
 
-int main(int argc, char **argv) {
-    const UnitTest tests[] = {
-        unit_test(test_packet_new_and_delete_does_not_leak_memory),
-        unit_test(test_stats_packet_new_extracts_the_correct_values),
-        unit_test(test_stats_packet_new_handles_null_padded_strings),
-        unit_test(test_log_packet_new_extracts_the_correct_values),
-    };
-    return run_tests(tests);
+Suite *check_suite(void) {
+    Suite *s = suite_create("check packet");
+
+    TCase *tc_core = tcase_create("Packet");
+    tcase_add_test(tc_core, check_packet_new_and_delete);
+    tcase_add_test(tc_core, check_stats_packet_new_extracts_the_correct_values);
+    tcase_add_test(tc_core, check_stats_packet_new_handles_null_padded_strings);
+    tcase_add_test(tc_core, check_log_packet_new_extracts_the_correct_values);
+    suite_add_tcase(s, tc_core);
+
+    return s;
 }
