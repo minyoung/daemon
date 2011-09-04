@@ -16,6 +16,7 @@ typedef struct packet {
 typedef struct stats_packet {
     u_int64_t timestamp;
     int64_t value;
+    char *type;
     char *service;
     char *metric;
     char *hostname;

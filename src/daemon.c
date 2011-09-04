@@ -28,6 +28,7 @@ struct daemon *daemon_new(struct config *config) {
         } else {
             self->log_file = NULL;
         }
+        self->lock_fd = 0;
 
         self->network_sockets[0] = 0;
         self->network_sockets[1] = 0;
