@@ -15,8 +15,8 @@ char *read_string(char **dest, char *buffer, int *offset) {
     return *dest;
 }
 
-struct packet *packet_new() {
-    logger(stdout, LOG_DEBUG, "packet_new [%m]");
+struct packet *packet_create() {
+    logger(stdout, LOG_DEBUG, "packet_create [%m]");
     struct packet *self = NULL;
 
     if (self = malloc(sizeof(*self))) {
@@ -32,7 +32,7 @@ void packet_delete(struct packet *self) {
     }
 }
 
-struct stats_packet *stats_packet_new(struct packet *packet) {
+struct stats_packet *stats_packet_create(struct packet *packet) {
     struct stats_packet *self = NULL;
     self = malloc(sizeof(*self));
     if (self == NULL) {
@@ -92,7 +92,7 @@ void stats_packet_delete(struct stats_packet *self) {
     }
 }
 
-struct log_packet *log_packet_new(struct packet *packet) {
+struct log_packet *log_packet_create(struct packet *packet) {
     struct log_packet *self = NULL;
     self = malloc(sizeof(*self));
     if (self == NULL) {

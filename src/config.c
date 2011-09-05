@@ -22,8 +22,8 @@ static const struct option args_long[] = {
     { 0,             0, NULL,  0  }
 };
 
-struct config *config_new() {
-    logger(stdout, LOG_DEBUG, "config_new [%m]");
+struct config *config_create() {
+    logger(stdout, LOG_DEBUG, "config_create [%m]");
     struct config *self = NULL;
 
     if (self = malloc(sizeof(*self))) {

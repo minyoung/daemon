@@ -26,7 +26,7 @@ const daemonize_status_t DAEMON_DAEMONIZED;
 const int DAEMON_CONTROL;
 const int DAEMON_CLIENT;
 
-struct daemon *daemon_new(struct config *config);
+struct daemon *daemon_create(struct config *config);
 void daemon_delete(struct daemon *self);
 
 daemonize_status_t daemon_daemonize(struct daemon *self);

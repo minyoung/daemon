@@ -3,9 +3,9 @@
 
 #include "logging.h"
 
-START_TEST (check_config_new_and_delete) {
+START_TEST (check_config_create_and_delete) {
     struct config *config = NULL;
-    config = config_new();
+    config = config_create();
     config_delete(config);
 }
 END_TEST
@@ -22,7 +22,7 @@ START_TEST (check_config_parse_args) {
         "--flock", "lock_filename",
         "--log", "log_filename"
     };
-    struct config *self = config_new();
+    struct config *self = config_create();
 
     ck_assert(config_parse_args(self, argc, argv) == SUCCESS);
     ck_assert_int_eq(self->daemon, 1);
@@ -42,7 +42,7 @@ START_TEST (check_config_default_args) {
     char *argv[] = {
         "test_config"
     };
-    struct config *self = config_new();
+    struct config *self = config_create();
 
     ck_assert(config_parse_args(self, argc, argv) == SUCCESS);
     ck_assert_int_eq(self->daemon, 0);
@@ -58,7 +58,7 @@ START_TEST (check_config_default_args) {
 END_TEST
 
 START_TEST (check_config_load_file) {
-    struct config *self = config_new();
+    struct config *self = config_create();
 
     ck_assert(config_load_file(self, "../tests/test.conf") == 0);
     ck_assert_int_eq(self->daemon, 1);
@@ -73,7 +73,7 @@ START_TEST (check_config_load_file) {
 END_TEST
 
 START_TEST (check_config_load_blank_file) {
-    struct config *self = config_new();
+    struct config *self = config_create();
     int argc = 1;
     char *argv[] = {
         "test_config"
@@ -96,7 +96,7 @@ Suite *check_suite(void) {
     Suite *s = suite_create("check config");
 
     TCase *tc_core = tcase_create("Config");
-    tcase_add_test(tc_core, check_config_new_and_delete);
+    tcase_add_test(tc_core, check_config_create_and_delete);
     tcase_add_test(tc_core, check_config_parse_args);
     tcase_add_test(tc_core, check_config_default_args);
     tcase_add_test(tc_core, check_config_load_file);

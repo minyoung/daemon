@@ -3,11 +3,11 @@
 
 #include <fcntl.h>
 
-START_TEST (check_daemon_new_and_delete) {
+START_TEST (check_daemon_create_and_delete) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
-    config = config_new();
-    daemon = daemon_new(config);
+    config = config_create();
+    daemon = daemon_create(config);
     daemon_delete(daemon);
 }
 END_TEST
@@ -15,9 +15,9 @@ END_TEST
 START_TEST (check_daemon_can_flock_a_file) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
-    config = config_new();
+    config = config_create();
     config->lock_filename = string_copy(&config->lock_filename, "test.lock");
-    daemon = daemon_new(config);
+    daemon = daemon_create(config);
     daemon->pid = 1;
 
     ck_assert(daemon_get_lock(daemon) == SUCCESS);
@@ -29,9 +29,9 @@ END_TEST
 START_TEST (check_daemon_fails_to_flock_an_already_flocked_file) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
-    config = config_new();
+    config = config_create();
     config->lock_filename = string_copy(&config->lock_filename, "test.lock");
-    daemon = daemon_new(config);
+    daemon = daemon_create(config);
     daemon->pid = 1;
 
     int to_parent[2];
@@ -77,7 +77,7 @@ Suite *check_suite(void) {
     Suite *s = suite_create("check daemon");
 
     TCase *tc_core = tcase_create("Daemon");
-    tcase_add_test(tc_core, check_daemon_new_and_delete);
+    tcase_add_test(tc_core, check_daemon_create_and_delete);
     tcase_add_test(tc_core, check_daemon_can_flock_a_file);
     tcase_add_test(tc_core, check_daemon_fails_to_flock_an_already_flocked_file);
     suite_add_tcase(s, tc_core);

@@ -34,11 +34,11 @@ typedef struct log_packet {
     char **tags;
 } log_packet_t;
 
-struct packet *packet_new();
+struct packet *packet_create();
 void packet_delete(struct packet *self);
-struct stats_packet *stats_packet_new(struct packet *packet);
+struct stats_packet *stats_packet_create(struct packet *packet);
 void stats_packet_delete(struct stats_packet *self);
-struct log_packet *log_packet_new(struct packet *packet);
+struct log_packet *log_packet_create(struct packet *packet);
 void log_packet_delete(struct log_packet *self);
 
 #endif

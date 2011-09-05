@@ -104,7 +104,7 @@ void network_handle_client_packet(struct daemon *self, struct packet *packet, in
 
     switch (packet->type) {
     case 'S':
-        pkt = stats_packet_new(packet);
+        pkt = stats_packet_create(packet);
         if (storage_store_stats(self, pkt) != SUCCESS) {
         } else {
         }

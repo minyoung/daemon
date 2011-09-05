@@ -4,8 +4,8 @@
 struct daemon *stub_daemon() {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
-    config = config_new();
-    daemon = daemon_new(config);
+    config = config_create();
+    daemon = daemon_create(config);
 
     return daemon;
 }

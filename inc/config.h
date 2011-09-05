@@ -21,7 +21,7 @@ typedef struct config {
     char *control_port;
 } config_t;
 
-struct config *config_new();
+struct config *config_create();
 void config_delete(struct config *self);
 
 status_t config_parse_args(struct config *self, int argc, char **argv);

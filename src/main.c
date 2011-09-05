@@ -7,8 +7,11 @@
 
 void cleanup(struct config *config, struct daemon *daemon) {
     logger(stdout, LOG_DEBUG, "Cleaning up [%m]");
-    config_delete(config);
-    daemon_delete(daemon);
+    if (daemon != NULL) {
+        daemon_delete(daemon);
+    } else {
+        config_delete(config);
+    }
 }
 
 int main(int argc, char **argv) {
@@ -16,7 +19,8 @@ int main(int argc, char **argv) {
     struct daemon *daemon = NULL;
     status_t return_code = SUCCESS;
 
-    if ((config = config_new()) == NULL) {
+    config = config_create();
+    if (config == NULL) {
         logger(stderr, LOG_CRIT, "Could not create config object [%m]");
         cleanup(config, daemon);
         exit(FAILURE);
@@ -35,7 +39,8 @@ int main(int argc, char **argv) {
         exit(return_code);
     }
 
-    if ((daemon = daemon_new(config)) == NULL) {
+    daemon = daemon_create(config);
+    if (daemon == NULL) {
         logger(stderr, LOG_CRIT, "Could not create daemon object [%m]");
         cleanup(config, daemon);
         exit(FAILURE);

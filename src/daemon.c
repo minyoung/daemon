@@ -16,8 +16,8 @@ const int DAEMON_CLIENT = 1;
 
 void daemon_log(struct daemon *self, int priority, char *format, ...);
 
-struct daemon *daemon_new(struct config *config) {
-    logger(stdout, LOG_DEBUG, "daemon_new [%m]");
+struct daemon *daemon_create(struct config *config) {
+    logger(stdout, LOG_DEBUG, "daemon_create [%m]");
     struct daemon *self = NULL;
 
     if (self = malloc(sizeof(*self))) {
