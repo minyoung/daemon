@@ -16,8 +16,9 @@ START_TEST (check_daemon_can_flock_a_file) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
     config = config_new();
-    config->lock_filename = "test.lock";
+    config->lock_filename = string_copy(&config->lock_filename, "test.lock");
     daemon = daemon_new(config);
+    daemon->pid = 1;
 
     ck_assert(daemon_get_lock(daemon) == SUCCESS);
 
@@ -29,8 +30,9 @@ START_TEST (check_daemon_fails_to_flock_an_already_flocked_file) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
     config = config_new();
-    config->lock_filename = "test.lock";
+    config->lock_filename = string_copy(&config->lock_filename, "test.lock");
     daemon = daemon_new(config);
+    daemon->pid = 1;
 
     int to_parent[2];
     int to_child[2];

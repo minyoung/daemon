@@ -74,6 +74,7 @@ int network_open_socket(struct daemon *self, char *port) {
 
     if (rp == NULL) {
         daemon_err(self, LOG_ERR, "Could not bind to socket [%m]");
+        socket_fd = 0;
         return socket_fd;
     }
     freeaddrinfo(result);

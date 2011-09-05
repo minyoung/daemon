@@ -16,10 +16,9 @@ START_TEST (check_network_can_open_a_socket) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
     config = config_new();
-    config->client_port = "7357";
     daemon = daemon_new(config);
 
-    ck_assert(network_open_socket(daemon) == SUCCESS);
+    ck_assert(network_open_socket(daemon, "7357") > 0);
 
     daemon_delete(daemon);
 }
@@ -29,7 +28,7 @@ START_TEST (check_network_can_receive_and_send_packets) {
     struct daemon *daemon = NULL;
     struct config *config = NULL;
     config = config_new();
-    config->client_port = "7357";
+    config->client_port = string_copy(&config->client_port, "7357");
     daemon = daemon_new(config);
 
     int fd[2];

@@ -8,24 +8,24 @@
 
 #include "logging.h"
 
-status_t storage_create_paths(struct daemon *self, unsigned char *hash) {
-    char fullpath[23];
+status_t storage_create_paths(struct daemon *self, const char *fullpath) {
     mode_t dirmode = 0;
 
     dirmode = S_IRWXU | S_IRWXG;
 
-    strncpy(&fullpath[0], &hash[0], 2);
-    fullpath[2] = 0;
-    if ((mkdir(fullpath, dirmode) != 0) && (errno != EEXIST)) {
-        daemon_err(self, LOG_ALERT, "Could not create path (%s): %s", fullpath, strerror(errno));
+    char subpath[6];
+    strncpy(&subpath[0], &fullpath[0], 2);
+    subpath[2] = 0;
+    if ((mkdir(subpath, dirmode) != 0) && (errno != EEXIST)) {
+        daemon_err(self, LOG_ALERT, "Could not create path (%s): %s", subpath, strerror(errno));
         return FAILURE;
     }
 
-    fullpath[2] = '/';
-    strncpy(&fullpath[3], &hash[2], 2);
-    fullpath[5] = 0;
-    if ((mkdir(fullpath, dirmode) != 0) && (errno != EEXIST)) {
-        daemon_err(self, LOG_ALERT, "Could not create path (%s): %s", fullpath, strerror(errno));
+    subpath[2] = '/';
+    strncpy(&subpath[3], &fullpath[3], 2);
+    subpath[5] = 0;
+    if ((mkdir(subpath, dirmode) != 0) && (errno != EEXIST)) {
+        daemon_err(self, LOG_ALERT, "Could not create path (%s): %s", subpath, strerror(errno));
         return FAILURE;
     }
 
@@ -33,14 +33,14 @@ status_t storage_create_paths(struct daemon *self, unsigned char *hash) {
 }
 
 char *storage_format_data_filename(struct daemon *self, unsigned char *hash) {
-    char *fullpath = malloc(sizeof(char) * 23);
+    char *fullpath = malloc(sizeof(char) * 43);
 
-    strncpy(&fullpath[0], &hash[0], 2);
-    fullpath[2] = '/';
-    strncpy(&fullpath[3], &hash[2], 2);
-    fullpath[5] = '/';
-    strncpy(&fullpath[6], &hash[4], 16);
-    fullpath[22] = 0;
+    sprintf(&fullpath[0], "%02x/%02x/", hash[0], hash[1]);
+    int i = 0;
+    for (i = 2; i < 20; i++) {
+        sprintf(&fullpath[2+i*2], "%02x", hash[i]);
+    }
+    fullpath[42] = 0;
 
     return fullpath;
 }
@@ -118,6 +118,10 @@ status_t storage_append_stats_file(struct daemon *self, const char *fullpath, co
 }
 
 status_t storage_create_new_stats_file(struct daemon *self, const char *fullpath, const struct stats_packet *packet) {
+    if (storage_create_paths(self, fullpath) != SUCCESS) {
+        return FAILURE;
+    }
+
     FILE *fp = fopen(fullpath, "w");
     if (fp == NULL) {
         daemon_err(self, LOG_ALERT, "Could not create data file (%s): %m", fullpath);
@@ -132,20 +136,23 @@ status_t storage_create_new_stats_file(struct daemon *self, const char *fullpath
     if (ret != SUCCESS) {
         return FAILURE;
     }
-
     return SUCCESS;
 }
 
 status_t storage_store_stats_data(struct daemon *self, unsigned char *hash, const struct stats_packet *packet) {
     char *fullpath = storage_format_data_filename(self, hash);
 
+    status_t result = FAILURE;
     if (access(fullpath, R_OK | W_OK) == 0) {
-        free(fullpath);
-        return storage_append_stats_file(self, fullpath, packet);
+        daemon_log(self, LOG_DEBUG, "Appending to stats file: %s [%m]", fullpath);
+        result = storage_append_stats_file(self, fullpath, packet);
     } else {
-        free(fullpath);
-        return storage_create_new_stats_file(self, fullpath, packet);
+        daemon_log(self, LOG_DEBUG, "Creating new stats file: %s [%m]", fullpath);
+        result = storage_create_new_stats_file(self, fullpath, packet);
     }
+
+    free(fullpath);
+    return result;
 }
 
 unsigned char *storage_get_stats_hash(struct daemon *self, struct stats_packet *packet) {

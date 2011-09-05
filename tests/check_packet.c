@@ -36,6 +36,7 @@ START_TEST (check_stats_packet_new_extracts_the_correct_values) {
     ck_assert_int_eq(self->tag_count, 0);
 
     stats_packet_delete(self);
+    packet_delete(packet);
 }
 END_TEST
 
@@ -72,6 +73,7 @@ START_TEST (check_stats_packet_new_handles_null_padded_strings) {
     ck_assert_str_eq(self->tags[1], "tag2");
 
     stats_packet_delete(self);
+    packet_delete(packet);
 }
 END_TEST
 
@@ -102,6 +104,7 @@ START_TEST (check_log_packet_new_extracts_the_correct_values) {
     ck_assert_int_eq(self->tag_count, 1);
 
     log_packet_delete(self);
+    packet_delete(packet);
 }
 END_TEST
 

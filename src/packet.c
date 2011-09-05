@@ -38,10 +38,21 @@ struct stats_packet *stats_packet_new(struct packet *packet) {
     if (self == NULL) {
         return NULL;
     }
+
+    self->type = NULL;
+    self->service = NULL;
+    self->metric = NULL;
+    self->hostname = NULL;
+
     self->tags = malloc(MAX_TAG_COUNT * sizeof(char *));
     if (self->tags == NULL) {
         free(self);
         return NULL;
+    }
+
+    int i;
+    for (i = 0; i < MAX_TAG_COUNT; ++i) {
+        self->tags[i] = NULL;
     }
 
     int offset = 0;
@@ -55,11 +66,6 @@ struct stats_packet *stats_packet_new(struct packet *packet) {
     read_string(&self->service, packet->message, &offset);
     read_string(&self->metric, packet->message, &offset);
     read_string(&self->hostname, packet->message, &offset);
-
-    int i;
-    for (i = 0; i < MAX_TAG_COUNT; ++i) {
-        self->tags[i] = NULL;
-    }
 
     i = 0;
     while (offset < packet->len) {
@@ -92,10 +98,20 @@ struct log_packet *log_packet_new(struct packet *packet) {
     if (self == NULL) {
         return NULL;
     }
+
+    self->type = NULL;
+    self->service = NULL;
+    self->log_line = NULL;
+    self->hostname = NULL;
     self->tags = malloc(MAX_TAG_COUNT * sizeof(char *));
     if (self->tags == NULL) {
         free(self);
         return NULL;
+    }
+
+    int i;
+    for (i = 0; i < MAX_TAG_COUNT; ++i) {
+        self->tags[i] = NULL;
     }
 
     int offset = 0;
@@ -106,11 +122,6 @@ struct log_packet *log_packet_new(struct packet *packet) {
     read_string(&self->service, packet->message, &offset);
     read_string(&self->log_line, packet->message, &offset);
     read_string(&self->hostname, packet->message, &offset);
-
-    int i;
-    for (i = 0; i < MAX_TAG_COUNT; ++i) {
-        self->tags[i] = NULL;
-    }
 
     i = 0;
     while (offset < packet->len) {
@@ -124,6 +135,14 @@ struct log_packet *log_packet_new(struct packet *packet) {
 
 void log_packet_delete(struct log_packet *self) {
     if (self != NULL) {
+        free(self->type);
+        free(self->service);
+        free(self->log_line);
+        free(self->hostname);
+        int i = 0;
+        for (i = 0; i < self->tag_count; i++) {
+            free(self->tags[i]);
+        }
         free(self->tags);
         free(self);
     }

@@ -26,6 +26,7 @@ typedef struct stats_packet {
 
 typedef struct log_packet {
     u_int64_t timestamp;
+    char *type;
     char *service;
     char *log_line;
     char *hostname;

@@ -69,7 +69,7 @@ void daemon_exit(struct daemon *self, int exit_code) {
 
 void daemon_err(struct daemon *self, int priority, char *format, ...) {
     va_list args;
-    if (priority < self->config->log_level) {
+    if (priority > self->config->log_level) {
         return;
     }
 
@@ -82,7 +82,7 @@ void daemon_err(struct daemon *self, int priority, char *format, ...) {
 
 void daemon_log(struct daemon *self, int priority, char *format, ...) {
     va_list args;
-    if (priority < self->config->log_level) {
+    if (priority > self->config->log_level) {
         return;
     }
 
