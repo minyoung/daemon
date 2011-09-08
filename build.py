@@ -24,9 +24,10 @@ PATHS = {
 }
 
 SOURCES = find_files(PATHS['src'], '*.c')
-TEST_FILES = find_files(PATHS['test'], 'check_*.c')
+TEST_FILES = find_files(PATHS['test'], '*.c')
 
 BINARY = 'daemon'
+TEST_BINARY = 'checks'
 CC = 'clang'
 CFLAGS = ['-g']
 CFLAGS.append('-Wno-implicit-function-declaration')
@@ -60,8 +61,7 @@ def tests():
         objects[os.path.join(PATHS['src'], src)] = object_name(src, '_')
     for test in TEST_FILES:
         objects[os.path.join(PATHS['test'], test)] = object_name(test, '_')
-        build_binary(os.path.join(PATHS['bin'], test[:-2]), objects)
-        del objects[os.path.join(PATHS['test'], test)]
+    build_binary(os.path.join(PATHS['bin'], TEST_BINARY), objects)
 
 def build_binary(binary, objects):
     compile(objects)

@@ -1,5 +1,5 @@
 #include "daemon.h"
-#include "checkhelper.c"
+#include "checks.h"
 
 #include <fcntl.h>
 
@@ -73,7 +73,8 @@ START_TEST (check_daemon_fails_to_flock_an_already_flocked_file) {
 }
 END_TEST
 
-Suite *check_suite(void) {
+
+Suite *make_daemon_suite(void) {
     Suite *s = suite_create("check daemon");
 
     TCase *tc_core = tcase_create("Daemon");

@@ -1,5 +1,5 @@
 #include "packet.h"
-#include "checkhelper.c"
+#include "checks.h"
 
 START_TEST (check_packet_create_and_delete) {
     struct packet *self = NULL;
@@ -108,7 +108,8 @@ START_TEST (check_log_packet_create_extracts_the_correct_values) {
 }
 END_TEST
 
-Suite *check_suite(void) {
+
+Suite *make_packet_suite(void) {
     Suite *s = suite_create("check packet");
 
     TCase *tc_core = tcase_create("Packet");

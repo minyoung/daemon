@@ -1,5 +1,5 @@
 #include "network.h"
-#include "checkhelper.c"
+#include "checks.h"
 
 #include <netinet/in.h>
 #include <netdb.h>
@@ -104,7 +104,8 @@ START_TEST (check_network_can_receive_and_send_packets) {
 }
 END_TEST
 
-Suite *check_suite(void) {
+
+Suite *make_network_suite(void) {
     Suite *s = suite_create("check network");
 
     TCase *tc_core = tcase_create("Network");

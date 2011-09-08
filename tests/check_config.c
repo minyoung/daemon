@@ -1,5 +1,5 @@
 #include "config.h"
-#include "checkhelper.c"
+#include "checks.h"
 
 #include "logging.h"
 
@@ -92,7 +92,8 @@ START_TEST (check_config_load_blank_file) {
 }
 END_TEST
 
-Suite *check_suite(void) {
+
+Suite *make_config_suite(void) {
     Suite *s = suite_create("check config");
 
     TCase *tc_core = tcase_create("Config");

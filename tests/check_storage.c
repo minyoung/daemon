@@ -1,5 +1,7 @@
 #include "storage.h"
-#include "checkhelper.c"
+#include "checks.h"
+
+#include <stdlib.h>
 
 struct daemon *stub_daemon() {
     struct daemon *daemon = NULL;
@@ -109,16 +111,16 @@ START_TEST (check_storage_write_header) {
 }
 END_TEST
 
-Suite *check_suite(void) {
+
+Suite *make_storage_suite(void) {
     Suite *s = suite_create("check storage");
 
     TCase *tc_core = tcase_create("Storage");
-    /* tcase_add_test(tc_core, check_hash_value); */
+    tcase_add_test(tc_core, check_hash_value);
     tcase_add_test(tc_core, check_store_stats_data);
-    /* tcase_add_test(tc_core, check_storage_data_filename); */
-    /* tcase_add_test(tc_core, check_storage_write_header); */
+    tcase_add_test(tc_core, check_storage_data_filename);
+    tcase_add_test(tc_core, check_storage_write_header);
     suite_add_tcase(s, tc_core);
 
     return s;
 }
-

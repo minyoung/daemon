@@ -1,5 +1,6 @@
 #include "logging.h"
-#include "checkhelper.c"
+#include "checks.h"
+
 #include <unistd.h>
 
 void test_logging_level(int priority, char *message, char *expected) {
@@ -36,7 +37,8 @@ START_TEST (check_basic_logging) {
 }
 END_TEST
 
-Suite *check_suite(void) {
+
+Suite *make_logging_suite(void) {
     Suite *s = suite_create("check logging");
 
     TCase *tc_core = tcase_create("Logging");

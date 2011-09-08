@@ -1,5 +1,7 @@
 #include "common.h"
-#include "checkhelper.c"
+#include "checks.h"
+
+#include <stdlib.h>
 
 START_TEST (check_string_copy) {
     char *src1 = "hello world!";
@@ -43,7 +45,8 @@ START_TEST (check_free_pointer) {
 }
 END_TEST
 
-Suite *check_suite(void) {
+
+Suite *make_common_suite(void) {
     Suite *s = suite_create("check common");
 
     TCase *tc_core = tcase_create("Common");
@@ -54,4 +57,3 @@ Suite *check_suite(void) {
 
     return s;
 }
-
