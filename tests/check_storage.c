@@ -79,7 +79,8 @@ END_TEST
 START_TEST (check_storage_data_filename) {
     struct daemon *daemon = stub_daemon();
 
-    char *filename = storage_format_data_filename(daemon, "\x11\x22\x33\x44\x55\x66\x77\x88\x99\x00\x11\x22\x33\x44\x55\x66\x77\x88\x99\x22");
+    unsigned char hash[] = "\x11\x22\x33\x44\x55\x66\x77\x88\x99\x00\x11\x22\x33\x44\x55\x66\x77\x88\x99\x22";
+    char *filename = storage_format_data_filename(daemon, hash);
     ck_assert_str_eq(filename, "11/22/334455667788990011223344556677889922");
 
     free(filename);

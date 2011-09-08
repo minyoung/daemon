@@ -1,5 +1,6 @@
 #include "logging.h"
 #include "checkhelper.c"
+#include <unistd.h>
 
 void test_logging_level(int priority, char *message, char *expected) {
     int fd[2];

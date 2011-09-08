@@ -1,8 +1,9 @@
 #include "config.h"
 
+#include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <getopt.h>
+#include <strings.h>
 
 #include <ini.h>
 
@@ -26,7 +27,8 @@ struct config *config_create() {
     logger(stdout, LOG_DEBUG, "config_create [%m]");
     struct config *self = NULL;
 
-    if (self = malloc(sizeof(*self))) {
+    self = malloc(sizeof(*self));
+    if (self != NULL) {
         logger(stdout, LOG_DEBUG, "config created");
         self->log_level = LOG_DEBUG;
         self->config_filename = NULL;

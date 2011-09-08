@@ -20,7 +20,8 @@ struct daemon *daemon_create(struct config *config) {
     logger(stdout, LOG_DEBUG, "daemon_create [%m]");
     struct daemon *self = NULL;
 
-    if (self = malloc(sizeof(*self))) {
+    self = malloc(sizeof(*self));
+    if (self != NULL) {
         self->config = config;
         if (self->config->log_filename != NULL) {
             self->log_file = fopen(self->config->log_filename, "a");
@@ -157,6 +158,8 @@ daemonize_status_t daemon_daemonize(struct daemon *self) {
         daemon_log(self, LOG_CRIT, "Could not set session id [%m]");
         daemon_exit(self, 1);
     }
+
+    return DAEMONIZE_SUCCESS;
 }
 
 void daemon_run(struct daemon *self) {

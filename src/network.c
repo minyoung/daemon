@@ -139,7 +139,7 @@ void *network_handle_client_socket(void *args) {
 
     struct sockaddr_in client_addr;
     struct sockaddr* client_sock = (struct sockaddr *)&client_addr;
-    int client_len = sizeof(client_addr);
+    unsigned int client_len = sizeof(client_addr);
 
     int client_socket = self->network_sockets[DAEMON_CLIENT];
 
@@ -177,6 +177,7 @@ void *network_handle_client_socket(void *args) {
         network_handle_client_packet(self, &buffer, client_socket, client_sock, host, service);
     }
     daemon_log(self, LOG_DEBUG, "Client network thread ending [%m]");
+    return NULL;
 }
 
 void network_handle_control_packet(struct daemon *self, struct packet *packet, int control_socket, struct sockaddr *client_addr, char *host, char *service) {
@@ -201,7 +202,7 @@ void *network_handle_control_socket(void *args) {
     struct daemon *self = (struct daemon *)args;
     struct sockaddr_in client_addr;
     struct sockaddr* client_sock = (struct sockaddr *)&client_addr;
-    int client_len = sizeof(client_addr);
+    unsigned int client_len = sizeof(client_addr);
 
     int control_socket = self->network_sockets[DAEMON_CONTROL];
 
@@ -240,5 +241,6 @@ void *network_handle_control_socket(void *args) {
     }
 
     daemon_log(self, LOG_DEBUG, "Control network thread ending [%m]");
+    return NULL;
 }
 

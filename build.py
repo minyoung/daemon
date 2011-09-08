@@ -27,8 +27,9 @@ SOURCES = find_files(PATHS['src'], '*.c')
 TEST_FILES = find_files(PATHS['test'], 'check_*.c')
 
 BINARY = 'daemon'
-CC = 'gcc'
+CC = 'clang'
 CFLAGS = ['-g']
+CFLAGS.append('-Wno-implicit-function-declaration')
 INCLUDES = [PATHS['inc'], os.path.join(PATHS['lib'], 'inc')]
 LIBRARIES = ['-L%s' % PATHS['lib'], '-lini', '-lpthread', '-lssl']
 DEFINES = []

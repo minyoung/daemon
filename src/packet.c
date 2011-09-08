@@ -19,7 +19,8 @@ struct packet *packet_create() {
     logger(stdout, LOG_DEBUG, "packet_create [%m]");
     struct packet *self = NULL;
 
-    if (self = malloc(sizeof(*self))) {
+    self = malloc(sizeof(*self));
+    if (self != NULL) {
         logger(stdout, LOG_DEBUG, "packet created");
     }
 

@@ -156,7 +156,7 @@ status_t storage_store_stats_data(struct daemon *self, unsigned char *hash, cons
 }
 
 unsigned char *storage_get_stats_hash(struct daemon *self, struct stats_packet *packet) {
-    int hash_len = SHA_DIGEST_LENGTH;
+    unsigned int hash_len = SHA_DIGEST_LENGTH;
     unsigned char *hash = malloc(sizeof(unsigned char) * hash_len);
     EVP_MD_CTX *ctx = EVP_MD_CTX_create();
     EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
@@ -173,5 +173,5 @@ unsigned char *storage_get_stats_hash(struct daemon *self, struct stats_packet *
 status_t storage_store_stats(struct daemon *self, struct stats_packet *packet) {
     unsigned char *hash = NULL;
     hash = storage_get_stats_hash(self, packet);
-    storage_store_stats_data(self, hash, packet);
+    return storage_store_stats_data(self, hash, packet);
 }
