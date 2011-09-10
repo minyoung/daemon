@@ -51,8 +51,8 @@ For building:
 [fabricate](http://code.google.com/p/fabricate/ "fabricate: The better build tool.")
 
 Ini file loading:
-[inih](http://code.google.com/p/inih/ "INI Not Invented Here"))
+[inih](http://code.google.com/p/inih/ "INI Not Invented Here")
 
 Unit tests:
-[check](http://check.sourceforge.net/ "Check: A unit testing framework for C"))
+[check](http://check.sourceforge.net/ "Check: A unit testing framework for C")
 

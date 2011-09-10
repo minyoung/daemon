@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    srunner_run_all(sr, CK_NORMAL);
+    srunner_run_all(sr, CK_ENV);
     number_failed = srunner_ntests_failed(sr);
 
     srunner_free(sr);
